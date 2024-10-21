@@ -92,18 +92,6 @@ enum LCD_ICON : uint16_t {
 
 
 //プロトタイプ
-/*低レベル関数。外部から呼ばれることが無いので、プロトタイプ宣言はコメントアウトしておく*/
-/*
-int i2c_write_byte(uint8_t val);            // i2cで１バイトのコマンド送信
-int i2c_write_Data(unsigned char *buf);     // i2cでバッファのデータを連続送信
-int i2c_write_DataByte(uint8_t val);
-int lcd_IconSetRAW(bool isDisp , uint8_t addr , uint8_t bits); 
-int lcd_send_byte(uint8_t val);
-int lcd_FunctionSet(uint8_t mode);
-*/
-
-
-
 int lcd_ClearDisplay(void);
 int lcd_ReturnHome(void);
 int lcd_EntryModeSet(bool isDisplayToLeft);
