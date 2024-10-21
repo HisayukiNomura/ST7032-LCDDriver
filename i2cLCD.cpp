@@ -168,7 +168,7 @@ const static int LCD_FUNC_INSTTBL_SELECT = 0x01;       // １のときはExtenti
 const static int LCD_SETDDRAM_MASK = 0b01111111;
 
 
-// LCD_TBL0_CURDISPSHIFT
+
 // 表示データの書き込み、読み出しを行わずに、カーソル位置の右移動、左移動、表示を行う。 
 // この命令は、表示データの修正や検索に使用します。 2 行表示の場合、1 行目の 40 桁目から
 // 2 行目にカーソルが移動します。 表示の移動は、全ての行で同時に行われます。 表示データ
