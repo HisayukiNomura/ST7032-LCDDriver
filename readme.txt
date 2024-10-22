@@ -67,6 +67,14 @@ CMD_DELAY|30        |一般コマンドの実行後の短い待ち時間
 CMD_DELAY|16        |一部のコマンドの実行後の長い待ち時間
 LCD_ICONEXIST|true| 接続されいている液晶にアイコン表示機能があるか
 
+@section kickstart 使用するまでの手順
+
+-# VSCodeで、拡張機能からRaspberry pi Picoをインストールし、SDK環境を構築する。\n
+-# プロジェクトウイザードで、i2cにチェックを入れてプロジェクトを新規作成する。\n
+-# i2cLCD.cpp、i2cLCD.h、i2cLCDlocal.hの３本のファイルを、作成したプロジェクトのフォルダにコピーする。\n
+-# プロジェクトの CMakeLists.txtを開き、add_executableに i2cLCD.cppを追加する。　（例：　add_executable(プロジェクト名 メインプログラム.cpp i2cLCD.cpp)　）\n
+-# LCDDriver.cppを参考に、メインプログラム内でi2cと液晶ライブラリを初期化し、使用する。\n
+
 
 @par 主な関数
 
