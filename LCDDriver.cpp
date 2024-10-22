@@ -1,7 +1,7 @@
 /**
  * @file LCDDriver.cpp
  * @author Hisayuki Nomura
- * @brief Strawberry Linux製、I2C低電圧キャラクタ液晶モジュール（１６ｘ２行） （SB1602B）のライブラリ用のサンプルプログラム\n 
+ * @brief ST7032をコントローラーに使用した液晶用のライブラリのサンプルプログラム\n 
  * @version 0.1
  * @date 2024-10-19
  * 

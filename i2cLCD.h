@@ -22,6 +22,8 @@
  */
  #define LCD_ICONEXIST   true
 
+ #define AQM0802 
+
 // Strawberry Linuxのi2c液晶　（１６x２行、SB1602B)
 
 // I2c定義
@@ -45,7 +47,9 @@
 /// @brief 必要に応じて変更。I2Cのボーレート(HZ)。100*1000の場合は、100KHzとなる。 
  #define I2C_SPEED (100 * 1000)
  /// @brief 必要に応じて変更。I2Cのスレーブi2cアドレス。ST7032の場合、常に0b0111110。異なるコントローラの場合などに変更する。
-#define I2C_ADDRESS 0b0111110
+ #define I2C_ADDRESS 0b0111110
+
+
 
 
 /**
@@ -56,6 +60,11 @@
 #define MAX_LINES      2
 /// @brief 必要に応じて変更。接続されている液晶の最大カラム数
 #define MAX_CHARS      16
+/// @brief デフォルトのコントラスト。init()内で最初に設定されるコントラスト。
+/// @details Strawberry LinuxのSB1602Bでは0x28位がちょっと濃い目だが良い感じ、
+/// 秋月のAQM0802＋PCA9515の場合は0x18位で良い感じ。(私感)
+#define DEFAULT_CONTRAST 0b00101000
+
 
 /**
  * @brief 一般コマンドの実行後の短い待ち時間。

@@ -1,10 +1,9 @@
 /**
  * @file i2cLCD.cpp
  * @author Hisayuki Nomura
- * @brief Strawberry Linux製、I2C低電圧キャラクタ液晶モジュール（１６ｘ２行） （SB1602B）を、Raspberry PI picoのC/C++ SDKから使用するためのライブラリです。\n 
+ * @brief ST7032をコントローラーに使用した液晶を、Raspberry PI picoのC/C++ SDKから使用するためのライブラリです。\n 
  * 
- * 
- * @version 0.1
+ *  @version 0.1
  * @date 2024-10-19
  * 
  * @copyright Copyright (c) 2024 \n
@@ -14,12 +13,18 @@
  * 同じPicoでも、Ardiunoのフレームワークを使用するパターンや、Pythonでのコントロールはほかに資料がたくさんあるのでそちらを参照してください。\n
  * ソースコードの拡張子はcppですが、C++の機能は使用していないのでCに変更してコンパイルできます。\n
  *
- * 製品の詳細は次のリンクを参照してください。\n
- * [製品ページ](https://strawberry-linux.com/catalog/items?code=27001)\n
- * [データーシート](https://strawberry-linux.com/pub/ST7032i.pdf)\n
- * [アプリケーションノート](https://strawberry-linux.com/pub/i2c_lcd-an001.pdf)\n
+ * テスト済みの製品は次の２製品です。
+ * [Strawberry Linux SB1602B](https://strawberry-linux.com/catalog/items?code=27001)\n
+ * - [アプリケーションノート](https://strawberry-linux.com/pub/i2c_lcd-an001.pdf)\n
+ * [秋月電子Raspberry Pi キャラクター液晶ディスプレイモジュールキット(AE-AQM0802+PCA9515)](https://akizukidenshi.com/catalog/g/g111354/)] \n
+ * - [マニュアル](https://akizukidenshi.com/goodsaffix/ae-aqm0802a.pdf)
+ * - [データシート](https://akizukidenshi.com/goodsaffix/AQM0802.pdf)
+ * 
+ * [ST7032のデーターシート](https://strawberry-linux.com/pub/ST7032i.pdf)\n
  * 
  * ST7032を使用しているほかの製品、秋月の[AQM1602Y-RN-GBW](https://akizukidenshi.com/catalog/g/g111916/)等もそのままか小修整で使用できるかもしれません。\n 
+ *
+ *
  * 
  * このライブラリを使用する場合、直接I2Cコマンドをデバイスに送信することは行いません。各機能は、ライブラリが受け取り、内部で現在の状態を
  * 保存してからLCDコントローラーにi2cを送信します。
@@ -37,14 +42,8 @@
 #include "i2cLCDlocal.h"
 
 
-
-
-
-
 #undef  i2c_default
 #define i2c_default I2C_PORT
-
-
 
 
 /**
@@ -733,7 +732,7 @@ void lcd_init()
     iRet = lcd_FunctionSet(LCDCommands.FuncSetOpt.EIGHTBITMODE | LCDCommands.FuncSetOpt.DOUBLELINE);
     iRet = lcd_FunctionSet(LCDCommands.FuncSetOpt.EIGHTBITMODE | LCDCommands.FuncSetOpt.DOUBLELINE | LCDCommands.FuncSetOpt.INSTRUCTIONTABLE);
     iRet = lcd_InternalOSCSet(false, 0x04);              // 1/5 bias , 183 Hz
-    iRet = lcd_ContrastPowerIconSet(0b00101000,true , true);
+    iRet = lcd_ContrastPowerIconSet(DEFAULT_CONTRAST,true , true);
     iRet = lcd_FollowerControlSet(true,4);
 
     //iRet = lcd_FunctionSet(LCD_FUNC_8BITMODE | LCD_FUNC_2LINE);

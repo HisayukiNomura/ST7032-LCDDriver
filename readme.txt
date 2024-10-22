@@ -1,7 +1,10 @@
 /**  
-@mainpage Raspberry PI PICO用 キャラクタ液晶ライブラリ
-Strawberry Linux のI2C低電圧キャラクタ液晶モジュール(SB1602B) を、Raspberry PI Picoに接続して使用する際のライブラリです。\n
-ほかの、ST7032iを液晶コントローラにしている、秋月電子のI2C接続小型キャラクターLCDモジュール(AQM1602XA-RN-GBW)等でも使用できる可能性があります。\n
+@mainpage ST7032をコントローラーに使用した液晶用のライブラリ
+ 
+Strawberry Linux の[I2C低電圧キャラクタ液晶モジュール(SB1602B)](https://strawberry-linux.com/catalog/items?code=27001)を、Raspberry PI Picoに接続して使用する際のライブラリです。\n
+ほかの、ST7032iを液晶コントローラにしている液晶モジュールでも使用できますが、SB1602BのLCDで文字領域の上に表示できるアイコンについては動作しません。（液晶にアイコン自体が無いため）\n
+Strawberry Linux のI2C低電圧キャラクタ液晶モジュール(SB1602B) と、秋月電子の[Raspberry Pi キャラクター液晶ディスプレイモジュールキット(AE-AQM0802+PCA9515)](https://akizukidenshi.com/catalog/g/g111354/)で動作を確認しました。\n
+その他、ST7032をコントローラーにしたもの、例えば秋月のI2C接続小型キャラクターLCDモジュール(AQM1602XA-RN-GBW)等でも使用できる可能性があります。\n
 
  
 @section main_sec 特徴
@@ -50,6 +53,7 @@ Strawberry Linux のI2C低電圧キャラクタ液晶モジュール(SB1602B)は
 I2C_PORT  | i2c0     |使用するI2Cのハードウェアブロック番号。i2c0 か i2c1を指定する。
 I2C_SDA   | 8        |SDAポートとして使用するポート番号。ピン番号ではない。例えば8の場合、GP8を意味するので１１番ピンとなる。
 I2C_SCL   | 9        |SCLポートとして使用するポート番号。ピン番号ではない。例えば9の場合、GP9を意味するので１２番ピンとなる。
+DEFAULT_CONTRAST|0b00101000|デフォルトのコントラスト。使用する液晶により適正値は異なる。strawberry linuxのSB1602Bにあわせてある。
 
 
 変更頻度は低いが変更可能なマクロ \n
