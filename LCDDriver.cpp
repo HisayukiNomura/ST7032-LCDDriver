@@ -62,31 +62,35 @@ int main()
         lcd_CursorMode(true,true,false);        // カーソルを下線のみに
         lcd_CursorPosition(1,0);
         lcd_CursorDisplay(true);               // カーソルを表示
-        for (int i=0;i<16;i++) {
+        // カーソル位置を左から右に移動させる
+        for (int i=0;i<MAX_CHARS-1;i++) {
             lcd_MoveCursor(1);
-            sleep_ms(500);
+            sleep_ms(200);
         }
         lcd_CursorMode(true,false,true);        // カーソルを点滅に
-        for (int i=0;i<16;i++) {
+        // カーソル位置を右から左に移動させる
+        for (int i=0;i<MAX_CHARS-1;i++) {
             lcd_MoveCursor(-1);
-            sleep_ms(500);
+            sleep_ms(200);
         }    
     
-        // 画面の消去（省電力モード）と復帰
-        for (int i=0;i > 10;i++) {
+        // 画面の消去（省電力モード）と復帰を行い、画面を点滅させる
+        for (int i=0;i < 5;i++) {
             lcd_Sleep(true);
-            sleep_ms(1000);
+            sleep_ms(500);
             lcd_Sleep(false); 
-            sleep_ms(1000);
+            sleep_ms(500);
         }
-
-        // アイコンの操作（Strawberry Linux液晶のみ)
-        for (int i=0;i > 10;i++) {
+        #if LCD_ICONEXIST
+        // アイコンの操作（Strawberry Linux液晶のみ)を行う。アンテナアイコンを点滅させる
+        for (int i=0;i < 10;i++) {
             lcd_IconSet(true,LCD_ICON::ANTENA);
             sleep_ms(1000);
             lcd_IconSet(false,LCD_ICON::ANTENA);
             sleep_ms(1000);
         }
+        #endif
+
 
         // スクリーンに表示されている内容のシフト操作
         lcd_ClearDisplay();
