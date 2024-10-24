@@ -52,9 +52,34 @@ int main()
 
         // 基本的な画面表示
         lcd_string("Hello, World!");
-
+        // 外字の設定と表示
+        // 顔？
+        uint8_t pat1[8] = { 0b00001110,
+                            0b00010001,
+                            0b00011011,
+                            0b00010001,
+                            0b00010101,
+                            0b00010001,
+                            0b00001110,
+                            0b00000000
+        };
+        //馬？
+        uint8_t pat2[8] = { 0b00011000,
+                            0b00001000,
+                            0b00001000,
+                            0b00001110,
+                            0b00001111,
+                            0b00001001,
+                            0b00001001,
+                            0b00000000
+        };        
+        lcd_CursorPosition(1,0);                // カーソルを２行目の４文字目に移動させて
+        lcd_CGRAMSet(0,pat1,8);
+        lcd_CGRAMSet(1,pat2,8);
+        lcd_string("\266\336\262\274\336:\000\001",8);
+        sleep_ms(1000);
         // 表示位置の変更と、フォーマット付きの画面表示
-        lcd_CursorPosition(1,0);                // カーソルを２行目の先頭に移動させて
+       lcd_CursorPosition(1,0);
         clock_t cl = clock();
         lcd_printf("Clock:%ld",(unsigned long)cl);  // フォーマット付きで文字を表示する
 

@@ -63,9 +63,41 @@
  * マッチしなくなり、誤動作する可能性がある。
  * 
  */
- static int i2c_write_byte(uint8_t val) {
+
+static int i2c_write_byte(uint8_t val,bool nostop) 
+{
     uint8_t t_data[2];
     t_data[0]=LCD_COMMAND;
+    t_data[1]=val;
+    volatile int iRet;
+    iRet = i2c_write_blocking(I2C_PORT, I2C_ADDRESS, t_data, 2, nostop);
+
+    sleep_us(CMD_DELAY);
+    return iRet;
+}
+ static int i2c_write_byte(uint8_t val) 
+ {
+    return i2c_write_byte(val,false);
+}
+/**
+ * @brief I2Cで１バイトのデータを送信する低レベルの関数。\n
+ * 通常はこの関数は直接使用せず、lcd_stringなどの上位関数を使用する。
+ * @attention
+ * この関数が呼ばれる前に、通常モード（LCD_FUNCTIONSETで、LCD_FUNC_INSTTBL_SELECTのビットをクリア）しておく必要がある。
+ * このライブラリでは、LCD_FUNC_INSTTBL_SELECTについては必要な時だけ１にする（デフォルトでオフ）になるようにしている。
+ * @param cmd コマンド。コマンドの場合は、LCD_COMMAND、文字列データのときはLCD_CHARACTER。
+ * @param val 送信するデータ。LCD_CHARACTER(0x40)に続いて送信される
+ * @return int 送信したバイト数。-1の場合はエラー。2が正常（LCD_CHARACTER＋valで２バイト）
+ * @details
+ * この関数は、内部的に使用される関数なので直接呼び出すのは推奨しない。\n 
+ * 本ライブラリでは、設定した値を変数に保存している。（Strawberry Linuxの液晶がWrite Onlyで設定値を読みだせないので）　
+ * 本関数のような低レベル関数を使用すると、この仕組みが上手く動作しなくなり、液晶の設定値とソフトウェアで保存した設定が
+ * マッチしなくなり、誤動作する可能性がある。
+ */
+static int i2c_write_DataByte(uint8_t cmd, uint8_t val)
+{
+    uint8_t t_data[2];
+    t_data[0]=cmd;
     t_data[1]=val;
     volatile int iRet;
     iRet = i2c_write_blocking(I2C_PORT, I2C_ADDRESS, t_data, 2, false);
@@ -73,6 +105,7 @@
     sleep_us(CMD_DELAY);
     return iRet;
 }
+
 /**
  * @brief I2Cで１バイトのデータを送信する低レベルの関数。\n
  * 通常はこの関数は直接使用せず、lcd_stringなどの上位関数を使用する。
@@ -89,14 +122,7 @@
  */
 static int i2c_write_DataByte(uint8_t val) 
 {
-    uint8_t t_data[2];
-    t_data[0]=LCD_CHARACTER;
-    t_data[1]=val;
-    volatile int iRet;
-    iRet = i2c_write_blocking(I2C_PORT, I2C_ADDRESS, t_data, 2, false);
-
-    sleep_us(CMD_DELAY);
-    return iRet;
+    return i2c_write_DataByte(LCD_CHARACTER,val);
 }
 /**
  * @brief I2Cで、複数バイトのデータを送信する低レベルの関数。\n
@@ -107,6 +133,7 @@ static int i2c_write_DataByte(uint8_t val)
  * このライブラリでは、LCD_FUNC_INSTTBL_SELECTについては必要な時だけ１にする（デフォルトでオフ）になるようにしている。
  
  * @param buf 送信するデータ。LCD_CHARACTER(0x40)＋buf[n]が連続して送信される。
+ * @param len 送信するデータの長さ。負の値が指定された場合、長さは文字列の長さ（NULL文字まで）
  * @return int 送信したバイト数。負の値の場合はエラー。
  * @details
  * この関数は、内部的に使用される関数なので直接呼び出すのは推奨しない。\n 
@@ -114,14 +141,18 @@ static int i2c_write_DataByte(uint8_t val)
  * 本関数のような低レベル関数を使用すると、この仕組みが上手く動作しなくなり、液晶の設定値とソフトウェアで保存した設定が
  * マッチしなくなり、誤動作する可能性がある。
  */
-static int i2c_write_Data(unsigned char *buf) 
+static int i2c_write_Data(unsigned char *buf, int length) 
 {
     int iByteSent = 0;
     bool bRet;
     volatile uint8_t i;
     uint8_t t_data[MAX_CHARS* MAX_LINES+1];
-
-    size_t len = strlen((const char *)buf);
+    size_t len;
+    if (length < 0) {
+        len = strlen((const char *)buf);
+    } else {
+        len = length;
+    }
     for (i = 0 ; i < len;i++) {
         t_data[0] = LCD_CHARACTER;
         t_data[i+1] = (uint8_t)buf[i];
@@ -130,6 +161,17 @@ static int i2c_write_Data(unsigned char *buf)
     iRet = i2c_write_blocking(I2C_PORT , I2C_ADDRESS , t_data, len+1, false);
     iByteSent += iRet;
     return iByteSent;
+}
+/**
+ * @brief 文字列の終端までを送信する低レベルの関数。\n
+ * 通常はこの関数は直接使用せず、lcd_stringなどの上位関数を使用する。
+ * 
+ * @param buf 文字列
+ * @return int 送信したバイト数。負の値の場合はエラー。
+ */
+static int i2c_write_Data(unsigned char *buf) 
+{
+    return i2c_write_Data(buf,-1);
 }
 
 /**
@@ -218,6 +260,9 @@ int lcd_CursorPosition(int line, int position)
         val |= (0x40 | (LCDCommands.DDRAMOpt.LCD_SETDDRAM_MASK & position));
     }
     int iRet = lcd_send_byte(val);
+    lcdSetting.curPosLine = line;
+    lcdSetting.curPosColumn = position;
+
     return iRet;
 }
 /**
@@ -403,8 +448,9 @@ int lcd_CursorDisplay(bool isDisp)
     }
     return iRet;
 }
+
 /**
- * @brief 現在のカーソル位置に、指定された文字列を表示する
+ * @brief 現在のカーソル位置に、指定された文字列(NULL終了）を表示する
  * 
  * @param s 表示する文字列
  * @return int 送信したバイト数。-1の場合はエラー。それ以外の正の値は正常。
@@ -412,6 +458,20 @@ int lcd_CursorDisplay(bool isDisp)
 int lcd_string(const char *s) 
 {
     int iRet = i2c_write_Data((unsigned char *)s);
+    lcdSetting.curPosColumn += strlen(s);
+    return iRet;
+}
+/**
+ * @brief 現在のカーソル位置に、指定された長さのバッファを表示する。ヌル文字も出力できる。
+ * 
+ * @param s 表示する文字列
+ * @param length 出力する長さ
+ * @return int 送信したバイト数。-1の場合はエラー。それ以外の正の値は正常。
+ */
+int lcd_string(const char *s , int length) 
+{
+    int iRet = i2c_write_Data((unsigned char *)s,length);
+    lcdSetting.curPosColumn += strlen(s);
     return iRet;
 }
 
@@ -429,6 +489,7 @@ void lcd_printf(const char *format, ...)
     va_list va;
     va_start(va , format);
     vsnprintf(aryLCDBuf,sizeof(aryLCDBuf),format , va);
+    lcdSetting.curPosColumn += strlen(aryLCDBuf);
     lcd_string(aryLCDBuf);
 }
 
@@ -687,6 +748,37 @@ int lcd_Sleep(bool isSleep)
     iSendBytes += iRet;
     return iSendBytes;
 }
+/**
+ * @brief 外字を設定する
+ * 
+ * @param charNo 0～8までの文字番号。それぞれが、キャラクターコード０～８に相当する
+ * @param aryPattern 8バイトの配列。フォントは5x8ドットなので、各バイトに５ビット分を格納する。最後の１行は、カーソルに使われるので0x00にしてお食方が良い。
+ * @param size 配列のサイズ
+ * @return int i2cで送信したバイト数。-1のときはエラー
+ * 
+ */
+int lcd_CGRAMSet(uint8_t charNo , uint8_t *aryPattern, int size)
+{
+    int iRet;
+    int iSendBytes = 0;
+    // カーソルを一時的に非表示にする
+    iRet = lcd_send_byte(LCDCommands.DISPLAYONOFF | (lcdSetting.isDisplayOn ? LCDCommands.DisplayOnOffOpt.DISPLAY_ON:0));
+    iSendBytes+=iRet;
+    uint8_t addr = (charNo << 3);
+    // i2c_write_byte((0x40 | addr),true);
+    iRet = lcd_send_byte(LCDCommands.IS0_SETCGRAM | (LCDCommands.SetCGRAMOpt.SETCGRAM_MASK & addr));
+    iSendBytes+=iRet;
+    for (int i=0;i<size;i++) {
+        iRet = i2c_write_DataByte(LCD_CHARACTER,*aryPattern);
+        iSendBytes+=iRet;
+        aryPattern++;
+    }
+    // カーソル表示を元に戻す
+    iRet = lcd_CursorMode(lcdSetting.isDisplayOn , lcdSetting.isUnderLine,lcdSetting.isBlink);
+    iSendBytes+=iRet;
+    lcd_CursorPosition(lcdSetting.curPosLine,lcdSetting.curPosColumn);
+    return iSendBytes;
+}
 
 /*
  * @brief 液晶関連の初期化処理。この関数を呼び出すと、各種初期化が行われ、画面消去、カーソルを左上、アイコン全非表示となる。
@@ -721,6 +813,8 @@ void lcd_init()
     lcdSetting.isInSleep = false;
     lcdSetting.isBias1By4 = false;
     lcdSetting.OSCFreq = 0x04;
+    lcdSetting.curPosLine = 0;
+    lcdSetting.curPosColumn = 0;
 
     iRet = lcd_send_byte(0x03);
     iRet = lcd_send_byte(0x03);
@@ -743,7 +837,11 @@ void lcd_init()
 #if LCD_ICONEXIST
     lcd_IconSetAll(false);
 #endif
-    lcd_CursorPosition(0,0);        
+    lcd_CursorPosition(0,0);
+
+
+
+
 }
 
 

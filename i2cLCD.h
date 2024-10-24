@@ -138,6 +138,7 @@ int lcd_FollowerControlSet(bool isOnOff,uint8_t ampRatio);
 int lcd_CursorPosition(int line, int position) ;
 int lcd_CursorMode(bool isDisplayOn , bool isUnderLine , bool isBlink);
 int lcd_CursorDisplay(bool);
+int lcd_CGRAMSet(uint8_t addr , uint8_t *aryPattern, int size);
 
 // アイコンが接続されていない液晶の場合は不要
 #if LCD_ICONEXIST
@@ -145,6 +146,7 @@ int lcd_IconSet(bool isDisp , LCD_ICON icon);
 #endif 
 
 int lcd_string(const char *s);
+int lcd_string(const char *s,int);
 void lcd_printf(const char *format, ...);
 
 int lcd_DisplayShift(int8_t ShiftCnt);

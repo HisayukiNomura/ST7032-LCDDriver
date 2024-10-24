@@ -54,7 +54,7 @@ const static struct LCD_COMMANDS {
     
     /// @brief 標準(IS=0)コマンド。カーソルの移動方向指定。lcd_DisplayShift(int8_t ShiftCnt)などで使用されている。
     uint8_t IS0_CURDISPSHIFT = 0x10;
-    /// @brief 標準(IS=0)コマンド。表示文字の設定。このライブラリでは現在未使用
+    /// @brief 標準(IS=0)コマンド。外字のフォント設定
     uint8_t IS0_SETCGRAM = 0x40;
 
     
@@ -152,8 +152,7 @@ const static struct LCD_COMMANDS {
      * 
      */
     const  struct SETCGRAM {
-        /// @brief LCD_TBL0_SETCGRAMの際に、アイコンをオンにするビットを立てる際のマスク。
-        /// @details 現在使用していない
+        /// @brief LCD_TBL0_SETCGRAMの際に、外字のアドレス（0b00000000～0b00111000 ８キャラクタでそれぞれ縦８ドット)のマスク。
         uint8_t SETCGRAM_MASK = 0b00111111;
     } SetCGRAMOpt;
 
@@ -277,6 +276,10 @@ struct LCDSetting {
     bool isBias1By4;
     /// @brief カーソル表示のオンオフ切り替え。カーソルの表現方法はisUnderlineや、isBrinkに従う。
     bool isCursorDisplay;
+    /// @brief 現在のカーソルの行
+    uint8_t curPosLine;
+    /// @brief 現在のカーソルのカラム
+    uint8_t curPosColumn;
 };
 /**
  * @brief 現在のLCDに対する設定値を保存する構造体の実体。Strawberry 液晶は現在の状態を読みだすことができないので、このライブラリで行った設定を保存しておく
