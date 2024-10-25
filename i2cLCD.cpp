@@ -51,6 +51,7 @@
  * 通常はこの関数は直接使用せず、lcd_send_byte(uint8_t val)関数を使用する。
  * 
  * @param val 送信するコマンド。LCD_COMMAND(0x00)に続いて送信される。
+ * @param nostop ストップビットを送らない。通常はfalseでよい。省略するとfalseとなる。
  * @return int 送信したバイト数。-1の場合はエラー。2が正常（LCD_COMMAND＋valで２バイト）
  * 
  * @attention
@@ -75,8 +76,26 @@ static int i2c_write_byte(uint8_t val,bool nostop)
     sleep_us(CMD_DELAY);
     return iRet;
 }
- static int i2c_write_byte(uint8_t val) 
- {
+/**
+ * @brief I2Cで１バイトのコマンドを送信する低レベルの関数。\n
+ * 通常はこの関数は直接使用せず、lcd_send_byte(uint8_t val)関数を使用する。
+ * 
+ * @param val 送信するコマンド。LCD_COMMAND(0x00)に続いて送信される。
+ * @return int 送信したバイト数。-1の場合はエラー。2が正常（LCD_COMMAND＋valで２バイト）
+ * 
+ * @attention
+ * この関数が呼ばれる前に、通常モード（LCD_FUNCTIONSETで、LCD_FUNC_INSTTBL_SELECTのビットをクリア）しておく必要がある。
+ * このライブラリでは、LCD_FUNC_INSTTBL_SELECTについては必要な時だけ１にする（デフォルトでオフ）になるようにしている。
+ * @details
+ * この関数は、内部的に使用される関数なので直接呼び出すのは推奨しない。\n 
+ * 本ライブラリでは、設定した値を変数に保存している。（Strawberry Linuxの液晶がWrite Onlyで設定値を読みだせないので）　
+ * 本関数のような低レベル関数を使用すると、この仕組みが上手く動作しなくなり、液晶の設定値とソフトウェアで保存した設定が
+ * マッチしなくなり、誤動作する可能性がある。
+ * 
+ */
+
+static int i2c_write_byte(uint8_t val) 
+{
     return i2c_write_byte(val,false);
 }
 /**
@@ -178,13 +197,7 @@ static int i2c_write_Data(unsigned char *buf)
  * @brief LCDにコマンドを送信する低レベルの関数。\n
  * 通常はこの関数は直接使用せず、コマンドに相当する関数(lcd_ClearDisplay、lcd_FunctionSet等)を呼び出す。
  * 
- * @param val 送信するデータ。LCD_COMMANDに続いて送信される。次の値が指定可能。\n
- * - LCD_CLEARDISPLAY = 0x01 \n 
- * - LCD_RETURNHOME = 0x02\n 
- * - LCD_ENTRYMODESET = 0x04\n 
- * - LCD_DISPLAYONOFF = 0x08\n
- * - LCD_FUNCTIONSET = 0x20\n
- * - LCD_SETDDRAMADDR = 0x80\n
+ * @param val 送信するデータ。LCD_COMMANDに続いて送信される。
  * @return int 送信したバイト数。-1の場合はエラー。2が正常（LCD_CHARACTER＋valで２バイト）
  */
 static int lcd_send_byte(uint8_t val) 
